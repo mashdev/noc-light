@@ -1,0 +1,57 @@
+### Function to post to Slack via webhook
+def rpiToSlack(tail):
+webhook_url = 'https://hooks.slack.com/services/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'
+rpiData = tail
+dataToSlack = {"text": rpiData}
+post = requests.post(
+    webhook_url,
+    json=dataToSlack
+)
+if post.status_code != 200:
+    raise ValueError('Error when posting to slack: %s, with:\n%s' % (post.status_code, post.text))
+
+### Original AWS Policy for NocLight-Scottsdale ###
+### Go to Secure > Policies > Click on the Policy Associated with your thing. ###
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Publish",
+        "iot:Receive"
+      ],
+      "Resource": [
+        "arn:aws:iot:us-east-1:427624130534:topic/sdk/test/java",
+        "arn:aws:iot:us-east-1:427624130534:topic/sdk/test/Python",
+        "arn:aws:iot:us-east-1:427624130534:topic/topic_1",
+        "arn:aws:iot:us-east-1:427624130534:topic/topic_2"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Subscribe"
+      ],
+      "Resource": [
+        "arn:aws:iot:us-east-1:427624130534:topicfilter/sdk/test/java",
+        "arn:aws:iot:us-east-1:427624130534:topicfilter/sdk/test/Python",
+        "arn:aws:iot:us-east-1:427624130534:topicfilter/topic_1",
+        "arn:aws:iot:us-east-1:427624130534:topicfilter/topic_2"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Connect"
+      ],
+      "Resource": [
+        "arn:aws:iot:us-east-1:427624130534:client/sdk-java",
+        "arn:aws:iot:us-east-1:427624130534:client/basicPubSub",
+        "arn:aws:iot:us-east-1:427624130534:client/sdk-nodejs-*"
+      ]
+    }
+  ]
+}
+
+###
