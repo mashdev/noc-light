@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+import socket
+import ssl
+import paho.mqtt.client as paho
 import sys
 import os
 import datetime
@@ -31,16 +34,18 @@ TestURLTimeout = 5
 ApplicationCheckURLs = ["http://learn.education2020.com/educator/monitor.aspx",
 "https://learn.education2020.com/educator/monitor.aspx",
 "https://learn.education2020.com/contentviewers/monitor",
-#"http://edgenuity.zendesk.com",
 "http://auth.edgenuity.com/login/login/student",
 "http://auth.edgenuity.com/login/login/educator",
-"https://edgenuity.slack.com",
+#"https://edgenuity.slack.com",
 "http://core.learn.edgenuity.com/platformsynthesizer/EdgeStatus/FullStatus",
 "http://cp.edgenuity.com/Contentplatform/api/EdgeStatus/FullStatus", 
 "http://auth.edgenuity.com/Login/EdgeStatus/FullStatus",
 "http://auth.edgenuity.com/AuthenticationAPI/req/EdgeStatus/FullStatus",
 "http://tools.core.learn.edgenuity.com/businessapi/api/EdgeStatus/FullStatus"]
+
 ApplicationTimeout = 6
+## Setting below for testing purposes
+#ApplicationTimeout = .2
 
 UrlBase = "http://r{x}.core.learn.edgenuity.com/"
 ApplicationCheckBase = ["ContentViewers/EdgeStatus/FullStatus", "QuestionAPI/api/EdgeStatus/FullStatus", "ContentEngineAPI/api/EdgeStatus/FullStatus", "student/EdgeStatus/FullStatus", "Educator/EdgeStatus/FullStatus", "Family/EdgeStatus/FullStatus", "LMSAPI/req/EdgeStatus/FullStatus", "Player/EdgeStatus/FullStatus"]
@@ -52,8 +57,61 @@ LongestApplicationURL = ""
 ApplicationYellowThreshold = 2
 ApplicationRedThreshold = 4
 
+## Start AWS Settings ##
+connflag = True
+
+# function for making connection to AWS
+def on_connect(client, userdata, flags, rc):
+	global connflag
+	print("Connected to AWS")
+	connflag = True
+	print("Connection returned result: " + str(rc) )
+
+ 
+# Function for Sending msg payload
+def on_message(client, userdata, msg):
+	print(msg.topic+" "+str(msg.payload))
+ 
+
+
+def on_log(client, userdata, level, buf):
+	print(msg.topic+" "+str(msg.payload))
+
+ 
+
+# mqttc object
+mqttc = paho.Client()
+# assign on_connect func
+mqttc.on_connect = on_connect
+# assign on_message function
+mqttc.on_message = on_message
+mqttc.on_log = on_log
+
+#### Change following parameters #### 
+# Noc-Light-Scottsdale AWS endpoint
+awshost = "a1buulfaeqxah3-ats.iot.us-east-1.amazonaws.com"
+# Default AWS port for IoT
+awsport = 8883
+# Thing_Name
+clientId = "Noc-Light-Scottsdale"
+# Thing_Name
+thingName = "Noc-Light-Scottsdale"
+# Root_CA_Certificate_Name
+caPath = "root-CA.crt"
+# <Thing_Name>.cert.pem
+certPath = "Noc-Light-Scottsdale.cert.pem"
+# <Thing_Name>.private.key
+keyPath = "Noc-Light-Scottsdale.private.key"
+# pass parameters to mqttc
+mqttc.tls_set(caPath, certfile=certPath, keyfile=keyPath, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+# connect to aws server
+mqttc.connect(awshost, awsport, keepalive=60)
+
+## End AWS Settings ##
+
 #to play a sound do it as follows:
 #os.system('mpg321 SadTrombone.mp3 &')
+
 
 def main():
 	console("Starting script, Beginning POST")
@@ -65,30 +123,34 @@ def main():
 	GPIO.setup(Strobe,GPIO.OUT)
 
 	Light(Green,On)
-	time.sleep(1)
+	time.sleep(.5)
 	Light(Green,Off)
 	Light(Yellow,On)
-	time.sleep(1)
+	time.sleep(.5)
 	Light(Yellow,Off)
 	Light(Red,On)
-	time.sleep(1)
+	time.sleep(.5)
 	Light(Red,Off)
 	Light(Strobe,On)
 	time.sleep(1)
 	Light(Strobe,Off)
 	
 	realmCounter = MinRealm
+
 	while (realmCounter <= MaxRealm):
 		for s in ApplicationCheckBase:
 			ApplicationCheckURLs.append(("%s%s" % (UrlBase, s)).replace('{x}', "{:0>2d}".format(realmCounter)))
 		realmCounter += 1
 	debug(ApplicationCheckURLs)
 
-	console("POST complete, URLs to check built, beginning polling")
+	postMsg = "NOC Light restarted, URLs built, polling started"
+	console(postMsg)
+	rpiStartupPost(postMsg)
+	
 	while True:
 		connectionWorksVal = connectionWorks()
 		applicationWorksVal = applicationWorks()
-
+		
 		if LongestApplicationTime > ApplicationRedThreshold:
 			console("Application running slowly: " + LongestApplicationURL)
 			Light(Red,On)
@@ -112,19 +174,32 @@ def main():
 				console("Can't verify connection to internet")
 			if not applicationWorksVal:
 				console("Application down or system slowness")
+				SummaryOfPoll.append("Application down or system slowness")
 			Light(Strobe,On)
 	
 		time.sleep(LoopSleep)
+		
+		if len(SummaryOfPoll) > 0:
+			for summary in SummaryOfPoll:
+				print(summary)
+
+			errMsgToAws(SummaryOfPoll)
+			del SummaryOfPoll[:]
 
 def debug(message):
 	if(DEBUG):
 		console(message)
 
+
 def console(message):
 	print("%s : %s" % (datetime.datetime.now(), message))
-		
+
+SummaryOfPoll = []
+
 def applicationWorks():
 	LongestApplicationTime = 0
+	global SummaryOfPoll
+
 	for i in ApplicationCheckURLs:
 		try:
 			start = time.time()
@@ -139,10 +214,79 @@ def applicationWorks():
 		except:
 			console(i)
 			console(sys.exc_info()[1])
+			SummaryOfPoll.append(i)
+			SummaryOfPoll.append(str('%.2f' % timeToCall))
 			return False
 			#pass
 
 	return True
+
+## Standard triggered errors  ##
+def errMsgToAws(msg):
+	colorStatus = "#F9F037"
+	setStatus = msg[1]
+
+	msgLen = len(msg)
+	messageText = ""
+	for m in range(msgLen):
+  		messageText += msg[m]+"\n"
+	
+	#if setStatus > .05:
+	#	colorStatus = "FF0000"
+	
+	errMessage = 	{
+    "attachments": [
+        {
+            "fallback": "NOC-Light Triggered",
+            "color": colorStatus,
+            "title": "Light Triggered",
+						"text": messageText,
+            "footer": "NOC-LIGHT",
+            "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+						"ts" : time.time()
+        }
+    ]
+	}
+	if connflag == True:
+		mqttc.publish("noclight-scottsdale", json.dumps(errMessage), qos=1)
+	return
+
+def rpiStartupPost(msg):
+	colorStatus = "#008000"
+	startMessage = 	{
+    "attachments": [
+        {
+            "fallback": "NOC-Light Triggered",
+            "color": colorStatus,
+            "title": "Light Triggered",
+						"text": msg,
+            "footer": "NOC-LIGHT",
+            "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+						"ts" : time.time()
+        }
+    ]
+	}
+	if connflag == True:
+		mqttc.publish("noclight-scottsdale", json.dumps(startMessage), qos=1)
+	return
+
+## Function creates a slack template with params
+def displayError(url, sc, ttc, st):
+	showError = 	{
+						"attachments": [
+								{
+										"fallback": url,
+										"color": "danger",
+										"pretext": "Light Triggered",
+										"title": url,
+										"text" : str(sc) +" at "+ str('%.2f' % ttc) + " seconds",
+										"footer": "NOC-LIGHT",
+										"footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+										"ts" : st
+								}
+						]
+				}
+	return showError
 
 def connectionWorks():
 	#rotate the array so we aren't always trying the same outside site
@@ -161,8 +305,7 @@ def connectionWorks():
 			pass
 			
 	return False
-	
-	
+
 def Light(pin, status):
 	GPIO.output(pin,status)
 
