@@ -243,9 +243,8 @@ def errMsgToAws(msg):
 						}
 				]
 		}
-		return errMessage
-		if connflag == True:
-  			mqttc.publish("noclight-scottsdale", json.dumps(errMessage), qos=1)
+		# return errMessage
+		mqttc.publish("noclight-scottsdale", json.dumps(errMessage), qos=1)
 		return
 
 	except(IndexError):
