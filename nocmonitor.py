@@ -268,8 +268,7 @@ def rpiStartupPost(msg):
         }
     ]
 	}
-	if connflag == True:
-		mqttc.publish("noclight-scottsdale", json.dumps(startMessage), qos=1)
+	mqttc.publish("noclight-scottsdale", json.dumps(startMessage), qos=1)
 	return
 
 
