@@ -224,32 +224,35 @@ def applicationWorks():
 ## Standard triggered errors  ##
 def errMsgToAws(msg):
 	colorStatus = "#F9F037"
-	setStatus = msg[1]
+	try:
+		msgLen = len(msg)
+		messageText = ""
+		for m in range(msgLen):
+				messageText += msg[m] + "\n"
 
-	msgLen = len(msg)
-	messageText = ""
-	for m in range(msgLen):
-  		messageText += msg[m]+"\n"
-	
-	#if setStatus > .05:
-	#	colorStatus = "FF0000"
-	
-	errMessage = 	{
-    "attachments": [
-        {
-            "fallback": "NOC-Light Triggered",
-            "color": colorStatus,
-            "title": "Light Triggered",
-						"text": messageText,
-            "footer": "NOC-LIGHT",
-            "footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
-						"ts" : time.time()
-        }
-    ]
-	}
-	if connflag == True:
-		mqttc.publish("noclight-scottsdale", json.dumps(errMessage), qos=1)
-	return
+		errMessage = {
+				"attachments": [
+						{
+								"fallback": "NOC-Light Triggered",
+								"color": colorStatus,
+								"title": "Light Triggered",
+								"text": messageText,
+								"footer": "NOC-LIGHT",
+								"footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+								"ts": time.time()
+						}
+				]
+		}
+		return errMessage
+		if connflag == True:
+  			mqttc.publish("noclight-scottsdale", json.dumps(errMessage), qos=1)
+		return
+
+	except(IndexError):
+		console("Requested index is higher than array")
+	except(SyntaxError):
+		console("Error in syntax")
+
 
 def rpiStartupPost(msg):
 	colorStatus = "#008000"
@@ -269,6 +272,7 @@ def rpiStartupPost(msg):
 	if connflag == True:
 		mqttc.publish("noclight-scottsdale", json.dumps(startMessage), qos=1)
 	return
+
 
 ## Function creates a slack template with params
 def displayError(url, sc, ttc, st):
