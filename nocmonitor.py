@@ -23,7 +23,7 @@ Strobe = 7
 
 DEBUG = False
 
-LoopSleep = 5
+LoopSleep = 7
 # Reverse logic here because a ground for the relay activates it
 On = False
 Off = True
@@ -71,13 +71,13 @@ def on_connect(client, userdata, flags, rc):
 # Function for Sending msg payload
 def on_message(client, userdata, msg):
 	print(msg.topic+" "+str(msg.payload))
- 
 
 
+## for logging purposes
 def on_log(client, userdata, level, buf):
 	print(msg.topic+" "+str(msg.payload))
 
- 
+
 
 # mqttc object
 mqttc = paho.Client()
@@ -134,7 +134,7 @@ def main():
 	Light(Strobe,On)
 	time.sleep(1)
 	Light(Strobe,Off)
-	
+
 	realmCounter = MinRealm
 
 	while (realmCounter <= MaxRealm):
@@ -150,6 +150,8 @@ def main():
 	while True:
 		connectionWorksVal = connectionWorks()
 		applicationWorksVal = applicationWorks()
+		awsPost = errMsgToAws("start")
+    
 		
 		if LongestApplicationTime > ApplicationRedThreshold:
 			console("Application running slowly: " + LongestApplicationURL)
@@ -221,37 +223,44 @@ def applicationWorks():
 
 	return True
 
+
 ## Standard triggered errors  ##
 def errMsgToAws(msg):
-	colorStatus = "#F9F037"
-	try:
-		msgLen = len(msg)
-		messageText = ""
-		for m in range(msgLen):
-				messageText += msg[m] + "\n"
+	if msg != "start":
+		colorStatus = "#F9F037"
+		try:
+			msgLen = len(msg)
+			messageText = ""
+			for m in range(msgLen):
+				if len(msg[m]) <= 5:
+					msg[m] = float(msg[m])
+					msg[m] = msg[m] * 100
 
-		errMessage = {
-				"attachments": [
-						{
-								"fallback": "NOC-Light Triggered",
-								"color": colorStatus,
-								"title": "Light Triggered",
-								"text": messageText,
-								"footer": "NOC-LIGHT",
-								"footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
-								"ts": time.time()
-						}
-				]
-		}
-		# return errMessage
-		mqttc.publish("noclight-scottsdale", json.dumps(errMessage), qos=1)
-		return
+					if msg[m] <= 3.0:
+						colorStatus = "#FFFF00"  #Yellow
+					elif 3.1 <= msg[m] <= 3.9:
+						colorStatus = "#FFA500"  #Orange
+					elif msg[m] < 4.0:
+						colorStatus = "#FF0000"  #Red
+				messageText += str(msg[m]) + "\n"
 
-	except(IndexError):
-		console("Requested index is higher than array")
-	except(SyntaxError):
-		console("Error in syntax")
-
+			errMessage = {
+					"attachments": [
+							{
+									"fallback": "NOC-Light Triggered",
+									"color": colorStatus,
+									"title": "Light Triggered",
+									"text": messageText,
+									"footer": "NOC-LIGHT",
+									"footer_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
+									"ts": time.time()
+							}
+					]
+			}
+			# return errMessage
+			mqttc.publish("noclight-scottsdale", json.dumps(errMessage), qos=1)
+		except:
+			print("Requested index is higher than array")
 
 def rpiStartupPost(msg):
 	colorStatus = "#008000"
