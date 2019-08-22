@@ -50,5 +50,5 @@ class DBConnection(object):
     return self.query(sql)
 
   def getById(self, id):
-    sql = "SELECT * FROM endpoints where id = ?"
+    sql = "SELECT * FROM endpoints where id = %s"
     return self.query(sql, (id,))
