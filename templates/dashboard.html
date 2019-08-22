@@ -1,6 +1,13 @@
 This is the dashboard template
-<ul>
+<table>
   {% for url in urls %}
-    <li> {{ url.urlEndpoint }} </li>
+    <tr> 
+      <td> {{ url.urlEndpoint }} </td> 
+      <td> <button onclick="window.location.href='/update/{{ url.id }}'"> Update {{ url.id }} </button> </td>
+      <td> <button> Disable </button> </td>
+      <td> <button> Delete </button></td>
+    </tr>
   {% endfor %}
-</ul>
+</table>
+  
+  
