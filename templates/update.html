@@ -1,0 +1,26 @@
+<a href="/dashboard"> <h3> Dashboard </h3> </a>
+
+<p>
+  Update url pages
+</p>
+<table style="width: 65%">
+  <tr>
+      <td> ID </td>
+      <td> Endpoint </td>
+      <td> Url Group </td>
+      <td> Is Monitored </td>
+    </tr>  
+  {% for i in u %}
+  <tr>
+    <td> {{ i.id }} </td>
+    <td> <input type="text" value={{ i.urlEndpoint }} size="100"> </td>
+    <td> {{ i.urlType }} </td>
+    <td> 
+      <select name="" id="">
+        <option value="" {% if i.urlEnabled == 0 %} selected {% endif %}> Disabled </option>
+        <option value="" {% if i.urlEnabled == 1 %} selected {% endif %}> Enabled </option>
+      </select>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
