@@ -1,29 +1,20 @@
 from flask import Flask, render_template
 import mysql.connector, os
+# from connection import DBConnection
+import connection
 from dotenv import load_dotenv
-load_dotenv(verbose=True)
-
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = b'(*&gh8&&G*&^]4%^&D*B:*m-*Nd*76v9&^)'
-
-sqldb = mysql.connector.connect(
-  host=os.getenv('host'),
-  user=os.getenv('user'),
-  passwd=os.getenv('passwd'),
-  database=os.getenv('database')
-)
+db = connection.DBConnection()
 
 @app.route('/')
 def index():
-  
   return 'Flask app running'
 
 
 @app.route('/dashboard')
 def dashboard():
-  geturls = sqldb.cursor(named_tuple=True)
-  geturls.execute("SELECT urlEndpoint FROM endpoints")
-  results = geturls.fetchall()
-
-  return render_template('dashboard.html', urls=results)
+  r = db.getUrlList('SELECT * FROM endpoints')
+  print(r)
+  return render_template('dashboard.html', urls=r)
