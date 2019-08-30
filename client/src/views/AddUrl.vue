@@ -102,11 +102,10 @@ export default {
       let failed = this.failed
       
       res.length = 0;
-      
+
       for(let i=0; i < this.urlsTotal; i++){
         axios.get( this.url + this.separated[i] )
           .then(function(response) {
-            // console.log(response.data.body, response.data.time);
             res.push(response.data);
             
           })
