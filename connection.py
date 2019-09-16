@@ -52,3 +52,6 @@ class DBConnection(object):
   def getById(self, id):
     sql = "SELECT * FROM endpoints where id = %s"
     return self.query(sql, (id,))
+  
+  def insertUrlEndpoint(self, urls):
+    sql = "INSERT INTO endpoints (id, urlEndpoint, urlType, UrlEnabled) VALUES (%s, %s, %s, %s) "
