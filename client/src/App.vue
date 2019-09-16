@@ -5,9 +5,9 @@
       <nav>
         <div class="nav-wrapper">
           <ul class="hide-on-med-and-down">
-            <li><a href="/"> Home </a></li>
-            <li><a href="/dashboard"> Dashboard </a></li>
-            <li><a href="/add"> Add </a></li>
+            <li><a href="/"> HOME </a></li>
+            <li><a href="/dashboard"> DASHBOARD </a></li>
+            <li><a href="/add"> ADD </a></li>
           </ul>
         </div>
       </nav>
@@ -19,9 +19,12 @@
 
 <script>
 
-
 export default {
+  data() {
+    return {
 
+    }
+  }
 }
 
 </script>
@@ -46,6 +49,7 @@ a {
 
 .nav-wrapper {
   box-shadow: none;
+  width: 50%;
 }
 
 </style>
