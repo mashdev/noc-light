@@ -36,19 +36,19 @@ ApplicationCheckURLs = ["http://learn.education2020.com/educator/monitor.aspx",
 "https://learn.education2020.com/contentviewers/monitor",
 "http://auth.edgenuity.com/login/login/student",
 "http://auth.edgenuity.com/login/login/educator",
-"https://edgenuity.slack.com",
+#"https://edgenuity.slack.com",
 "http://core.learn.edgenuity.com/platformsynthesizer/EdgeStatus/FullStatus",
 "http://cp.edgenuity.com/Contentplatform/api/EdgeStatus/FullStatus", 
 "http://auth.edgenuity.com/Login/EdgeStatus/FullStatus",
 "http://auth.edgenuity.com/AuthenticationAPI/req/EdgeStatus/FullStatus",
 "http://tools.core.learn.edgenuity.com/businessapi/api/EdgeStatus/FullStatus"]
 
-ApplicationTimeout = 6
+ApplicationTimeout = 10
 ## Setting below for testing purposes
 #ApplicationTimeout = .2
 
 UrlBase = "http://r{x}.core.learn.edgenuity.com/"
-ApplicationCheckBase = ["ContentViewers/EdgeStatus/FullStatus", "QuestionAPI/api/EdgeStatus/FullStatus", "ContentEngineAPI/api/EdgeStatus/FullStatus", "student/EdgeStatus/FullStatus", "Educator/EdgeStatus/FullStatus", "Family/EdgeStatus/FullStatus", "LMSAPI/req/EdgeStatus/FullStatus", "Player/EdgeStatus/FullStatus"]
+ApplicationCheckBase = ["ContentViewers/EdgeStatus/FullStatus", "QuestionAPI/api/EdgeStatus/FullStatus", "ContentEngineAPI/api/EdgeStatus/FullStatus", "student/EdgeStatus/FullStatus", "Educator/EdgeStatus/FullStatus", "Family/EdgeStatus/FullStatus", "/lmsapi/req/status/index", "Player/EdgeStatus/FullStatus"]
 MinRealm = 2
 MaxRealm = 22
 
