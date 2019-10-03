@@ -48,11 +48,13 @@ def checkApplicationLatency(a):
     requests.get(a, stream=True).close()
     end = time.time()
     timeToCall = end - start
-    # print(timeToCall)
+    print(a +" - " + "{0:.3f}".format(timeToCall) )
 
-    if timeToCall < 0.009:
-      fastestUrls.append(a)
-      print(a, "is the fastest")
+    ######
+    # if timeToCall < 0.009:
+    #   fastestUrls.append(a)
+    #   print(a, "is the fastest")
+    ######
 
     # if timeToCall > 0.110000:
     #   print(a, " is the slowest url", timeToCall)
@@ -79,11 +81,13 @@ def checkApplicationLatency(a):
     #   LongestApplicationURL = a
   except:
     print("slowest url is:", a)
-    requests.post(
-      webhook_url,
-      json=slackMessage(text=a, color=red),
-      headers={'Content-Type': 'application/json'}
-    )
+    ######################
+    # requests.post(
+    #   webhook_url,
+    #   json=slackMessage(text=a, color=red),
+    #   headers={'Content-Type': 'application/json'}
+    # )
+    #######################
 
     # print(a,"timed out")
     # console(a)
