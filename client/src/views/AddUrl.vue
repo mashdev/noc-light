@@ -2,32 +2,32 @@
   <div>
     <div class="container">
       <p class="left slim">Enter URL Endpoint(s)</p>
-      <textarea 
-        name="urltext" 
-        id="urlstext" 
-        class="url-text-area" 
-        v-model="urltext" 
+      <textarea
+        name="urltext"
+        id="urlstext"
+        class="url-text-area"
+        v-model="urltext"
         v-on:keyup="ckSubmitBtn"
         v-on:mouseup="ckSubmitBtn"
         placeholder="(For multiple endpoints separate with a comma)"
         rows="10"
       ></textarea>
-      <div class="btn-area left">
-        <a class="waves-effect waves-light btn-flat check-url-btn" v-show="submitBtn" v-on:click="separateAndTest(), showInsertButton()"> Check URL
+      <div class="btn-area text-left">
+        <a class="btn btn-outline-success check-url-btn" v-show="submitBtn" v-on:click="separateAndTest(), showInsertButton()"> Check URL
         </a>
-
-        <a class="waves-effect waves-red btn-flat" v-show="resetBtn" v-on:click="clearResults()">    clear
+        <a class="btn btn-outline-warning" v-show="resetBtn" v-on:click="clearResults()">
+          Clear
         </a>
       </div>
 
-    <!-- <form action=""> -->
-      <table class="url-tbl highlight">
+      <table class="table table-borderless">
         <tbody
           v-for="(get, index) in reformatted"
           v-bind:key="index"
+          class="tbl-body"
         >
-          <div class="tbl-row">
-            <tr v-if="get.statuscode < 215">
+          <div class="">
+            <tr class="tbl-row" v-if="get.statuscode < 215">
               <td class="green-light">
               </td>
               <td>
@@ -39,17 +39,14 @@
               <td class="green-text">
                 Status Code: {{ get.statuscode }}
               </td>
-              <td>
-                <SelectMenu></SelectMenu>
-              </td>
             </tr>
           </div>
         </tbody>
           <tr v-if="insertBtn">
-            <td class="insert-btn-row-td center" colspan="4"> 
-              <button class="btn insert-btn" v-on:click="submitEndPointUrls()">
+            <td class="insert-btn-row-td center" colspan="4">
+              <button class="btn btn-success" v-on:click="submitEndPointUrls()">
                 Insert
-              </button> 
+              </button>
             </td>
           </tr>
 
@@ -74,82 +71,98 @@
         </div>
         </tbody>
       </table>
-    <!-- </form> -->
+
+    <div v-if="resultSet.length > 0">
+      <div
+        v-for="(result, rs) in resultSet"
+        v-bind:key="rs"
+      >
+        <div v-if="result.stat == 800">
+          <p>{{ result.url }}<span class="dupe-record"> is already saved to the database.</span> </p>
+        </div>
+
+        <div v-if="result.stat == 200">
+          <p>{{ result.url }} <span class="success-entry"> successfully saved to database </span></p>
+        </div>
+
+      </div>
+    </div>
   </div>
   </div>
 </template>
 
 <script>
-import Icons from '@/components/Icons'
-import SelectMenu from '@/components/SelectMenu'
+import Icons from '@/components/Icons';
+import SelectUrlType from '@/components/UrlTypeDDL';
 
 export default {
   components: {
     Icons,
-    SelectMenu
+    SelectUrlType,
   },
   data() {
     return {
-      urltext : null,
+      urltext: null,
       separated: [],
       urlsTotal: null,
       reformatted: [],
       failures: [],
       baseUrl: 'http://127.0.0.1:5000',
       url: 'http://localhost:5000/check/?param=',
-      submitBtn : false,
-      resetBtn : false,
-      insertBtn : false,
-      selected: ''
-    }
+      submitBtn: false,
+      resetBtn: false,
+      insertBtn: false,
+      selected: '',
+      selectMenu: [
+        { id: 1, item: 'Internal Site', value: 1 },
+        { id: 2, item: 'External Site', value: 2 },
+      ],
+      selectedItem: [],
+      resultSet: [],
+    };
   },
 
   methods: {
     separateAndTest() {
       this.separated = this.urltext.split(',');
       this.urlsTotal = this.separated.length;
-      let res = this.reformatted;
-      let fails = this.failures;
+      const res = this.reformatted;
+      const fails = this.failures;
 
       fails.length = 0;
       res.length = 0;
 
-      for(let i=0; i < this.urlsTotal; i++){
+      for (let i = 0; i < this.urlsTotal; i++) {
         try {
-          axios.get( this.url + this.separated[i] )
-          .then(function(response) {
-            // console.dir(response)
-
-            if(response.data.statuscode == 200){
-              console.log("API Call Successful")
-              res.push(response.data);
-            }
-            else if (response.data.statuscode > 300){
-              console.log("API CALL FAILED: "+ response.data.statuscode);
-              fails.push(response.data)
-            }
-          })
-          .catch(function(errs) {
-            fails.push("response.data failed: "+ errs);
-          })
+          axios.get(this.url + this.separated[i])
+            .then((response) => {
+              if (response.data.statuscode == 200) {
+                res.push(response.data);
+              } else if (response.data.statuscode > 300) {
+                console.log(`API CALL FAILED: ${response.data.statuscode}`);
+                fails.push(response.data);
+              }
+            })
+            .catch((errs) => {
+              fails.push(`response.data failed: ${errs}`);
+            });
         } catch (error) {
-          console.log("An error occurred: "+error);
-          fails.push(response.data)
+          console.log(`An error occurred: ${error}`);
+          fails.push(response.data);
         }
-      } //end for loop
-
-
-      
+      } // end for loop
     },
 
     ckSubmitBtn() {
-      if(this.urltext.length > 10 && this.urltext != null) {
-        this.submitBtn = true;
-        this.resetBtn = true;
-      }
-      else {
-        this.submitBtn = false;
-        this.resetBtn = false;
+      if (this.urltext != null) {
+        if (this.urltext.length > 10 && this.urltext != null) {
+          this.submitBtn = true;
+          this.resetBtn = true;
+          this.resultSet.length = 0;
+        } else {
+          this.submitBtn = false;
+          this.resetBtn = false;
+        }
       }
     },
 
@@ -163,28 +176,42 @@ export default {
 
     showInsertButton() {
       setInterval(() => {
-        if(this.reformatted.length > 0) {
+        if (this.reformatted.length > 0) {
           this.insertBtn = true;
-        }
-        else {
+        } else {
           this.insertBtn = false;
         }
-      }, 700)
+      }, 700);
     },
 
     submitEndPointUrls() {
-        // console.log(urlArr);
-        axios.post(this.baseUrl+'/create', {
-          data: {
-            params : this.reformatted
+      axios.post(`${this.baseUrl}/create`, {
+        data: {
+          params: this.reformatted,
+        },
+      })
+        .then((resp) => {
+          for (let i = 0; i < resp.data.length; i++) {
+            this.resultSet.push(resp.data[i]);
           }
+          this.clearResults();
         })
-    }
+        .catch((err) => {
+          console.log('Error caught: ');
+          console.log(err);
+          this.resultSet.push(err);
+        });
+    },
+
+    addSelectedUrlType(uid, items) {
+      const res = this.reformatted;
+      res[2].push(items);
+    },
 
 
-  } //end methods:
+  }, // end methods:
 
-} //end export default()
+}; // end export default()
 </script>
 
 <style scoped>
@@ -192,19 +219,21 @@ table {
   width: 100%;
 }
 
-tr {
+td {
+  /* width: 100%; */
+  padding: 5px;
+  margin: 5px 0px 5px 0px;
+  border-radius: 0;
+  text-align: left;
+}
+
+.tbl-body {
   width: 100%;
 }
 
 .tbl-row {
   padding-bottom: 10px;
-  width: 100%;
-}
-
-td {
-  padding: 5px;
-  margin: 5px 0px 5px 0px;
-  border-radius: 0;
+  /* width: 100%; */
 }
 
 .url-text-area{
@@ -215,11 +244,13 @@ td {
 .green-light {
   background-color: green;
   padding: 5px 3px 5px 3px;
+  width: 3px;
 }
 
 .red-light {
   background-color: red;
   padding: 5px 3px 5px 3px;
+  width: 3px;
 }
 
 .tbl-row-err {
@@ -248,13 +279,19 @@ td {
 }
 
 .check-url-btn {
-  background-color: orange;
+  margin-right: 10px;
 }
 
 .insert-btn {
   background-color: green;
 }
 
+.dupe-record {
+  color: red;
+}
 
+.success-entry {
+  color: green;
+}
 
 </style>
