@@ -38,9 +38,11 @@ def dashboard():
 @app.route('/create', methods=['GET','POST'])
 def create():
   if request.method == 'POST':
+    result = []
     for item in request.json['data']['params']:
-      print(item['url'])
-    return 'you request the post method'
+      insert = db.insertUrlEndpoint(item['url'].strip())
+      result.append(insert)
+    return jsonify(result)
     
   if request.method == 'GET':
     return 'get method'
