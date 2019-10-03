@@ -1,8 +1,8 @@
 <template>
   <div>
 
-    <i class="material-icons" v-on:click="check(uid)"> 
-      {{ iconshape }} 
+    <i class="material-icons" v-on:click="check(uid)">
+      {{ iconshape }}
     </i>
 
     <i v-if="iconshape == check" class="material-icons" >
@@ -21,31 +21,31 @@
 export default {
 
   name: 'Icons',
-  
-  props : ['uid'],
+
+  props: ['uid'],
 
   data() {
     return {
       iconshape: 'add',
-      remove: 'close'
-    }
+      remove: 'close',
+    };
   },
 
   methods: {
-    check(id){
+    check(id) {
       // alert(id)
-      this.iconshape = 'check'
-    }
+      this.iconshape = 'check';
+    },
   },
 
   computed: {
-    
-  }
-  
-}
+
+  },
+
+};
 </script>
 
 <style scoped>
- 
+
 
 </style>
