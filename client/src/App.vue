@@ -1,17 +1,11 @@
 <template>
   <div id="app">
-    <div class="navbar container">
-      <div class="navbar-fixed">
-      <nav>
-        <div class="nav-wrapper">
-          <ul class="hide-on-med-and-down">
-            <li><a href="/"> HOME </a></li>
-            <li><a href="/dashboard"> DASHBOARD </a></li>
-            <li><a href="/add"> ADD </a></li>
-          </ul>
-        </div>
-      </nav>
-      </div>
+    <div class="container nav-bar-container">
+      <ul class="nav justify-content-center">
+        <li><a class="nav-link active" href="/"> HOME </a></li>
+        <li><a class="nav-link active" href="/dashboard"> DASHBOARD </a></li>
+        <li><a class="nav-link active" href="/add"> ADD </a></li>
+      </ul>
     </div>
       <router-view/>
     </div>
@@ -23,9 +17,9 @@ export default {
   data() {
     return {
 
-    }
-  }
-}
+    };
+  },
+};
 
 </script>
 
@@ -47,9 +41,13 @@ a {
   color: #37474f;
 }
 
-.nav-wrapper {
-  box-shadow: none;
-  width: 50%;
+.nav-bar-container {
+  background-color: #37474f;
+  margin-bottom: 45px;
+}
+
+.nav-bar-container a {
+  color: #fff;
 }
 
 </style>
