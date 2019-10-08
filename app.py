@@ -21,10 +21,13 @@ db = connection.DBConnection()
 
 ###############
 # API Endpoints
+
+# test route
 @app.route('/ping')
 def pong():
   return jsonify('pong')
 
+# home page
 @app.route('/')
 def index():
   return 'Flask app running'
@@ -32,9 +35,11 @@ def index():
 # return list of current api's
 @app.route('/dashboard')
 def dashboard():
-  results = db.getUrlList('SELECT * FROM endpoints WHERE urlEnabled = 1')
-  return jsonify(results)
+  if(request.method == 'GET'):
+    ## put in additional parameters for filtering/sorting
+    return jsonify(db.getUrlList("SELECT id, urlEndpoint, urlEnabled, u.categoryName FROM endpoints e INNER JOIN urlcategories u ON e.urlType = u.catid "))
 
+# create new monitored endpoint
 @app.route('/create', methods=['GET','POST'])
 def create():
   if request.method == 'POST':
@@ -49,16 +54,28 @@ def create():
   
   # return redirect('/add/', 302)
 
+# get endpoint data by id
 @app.route('/update/<id>', methods=['GET', 'POST'])
 def update(id):
   if(request.method == 'GET'):
     results = db.getById(id)
-    return jsonify(results)
-    # return render_template('update.html', u=results)
+    arr = results[0][0]
+    return json.dumps(results)
   
   if(request.method == 'POST'):
-    return "return method is post"
+    row = {
+      'body' : {
+      'endpoint' : request.json['data']['params']['endpoint'],
+      'urltype' : request.json['data']['params']['urltype'],
+      'isenabled' : request.json['data']['params']['isenabled'],
+      'uid' : request.json['data']['params']['uid']
+      }
+    }
+    result = db.updateUrlEndpoint(json.dumps(row))
+    return result
+    
 
+# check if endpoint exists in db
 @app.route('/check/', methods=['GET', 'POST']) 
 def check():
   url = request.args.get('param')
@@ -104,7 +121,7 @@ def check():
     error2 = {
       "url" : url,
       "statuscode" : 404,
-      "text" : "UNABLE TO CONNECT TO SITE"
+      "text" : "Unable to connecto to site or endpoint"
     }
     return error2
 
@@ -143,6 +160,13 @@ def check():
       "text" : "UNEXPECTED EXCEPTION, SORRY CHARLIE"
     }
     return error6
+
+# list available categories in db
+@app.route('/categories')
+def categories():
+  #if(request.method == 'GET'):
+  categories = db.getCategoryList()
+  return json.dumps(categories)
 
 
 if __name__ == '__main__':
