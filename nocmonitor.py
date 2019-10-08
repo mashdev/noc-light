@@ -48,7 +48,7 @@ ApplicationTimeout = 10
 #ApplicationTimeout = .2
 
 UrlBase = "http://r{x}.core.learn.edgenuity.com/"
-ApplicationCheckBase = ["ContentViewers/EdgeStatus/FullStatus", "QuestionAPI/api/EdgeStatus/FullStatus", "ContentEngineAPI/api/EdgeStatus/FullStatus", "student/EdgeStatus/FullStatus", "Educator/EdgeStatus/FullStatus", "Family/EdgeStatus/FullStatus", "/lmsapi/req/status/index", "Player/EdgeStatus/FullStatus"]
+ApplicationCheckBase = ["ContentViewers/EdgeStatus/FullStatus", "QuestionAPI/api/EdgeStatus/FullStatus", "ContentEngineAPI/api/EdgeStatus/FullStatus", "student/EdgeStatus/FullStatus", "Educator/EdgeStatus/FullStatus", "Family/EdgeStatus/FullStatus", "/LMSAPI/req/EdgeStatus/FullStatus", "Player/EdgeStatus/FullStatus"]
 MinRealm = 2
 MaxRealm = 22
 
