@@ -13,12 +13,12 @@
           <tbody v-for="url in urls" v-bind:key="url[0]" class="text-left">
             <tr>
               <td> {{ url[1] }} </td>
-              <td> {{ url[2] }} </td>
               <td> {{ url[3] }} </td>
+              <td> {{ url[2] == 0 ? "No" : "Yes" }} </td>
               <td>
                 <a v-bind:href="/update/+url[0]"
                 >
-                  <span class="btn btn-outline-dark">Edit</span>
+                  <span class="btn btn-outline-dark btn-sm">Edit</span>
                 </a>
               </td>
             </tr>
@@ -35,7 +35,7 @@ export default {
 
   data() {
     return {
-      urls: null,
+      urls: '',
       dash: '',
       isModalVisible: false,
     };
@@ -45,7 +45,9 @@ export default {
     dashboard() {
       return axios.get('http://localhost:5000/dashboard')
         .then((res) => {
+          console.log(res.data[0])
           this.urls = res.data;
+          
         })
         .catch((error) => {
           console.log(error);
