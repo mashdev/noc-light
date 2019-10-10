@@ -1,12 +1,13 @@
 import noclightmonitor
 import mysql.connector
-
+from dotenv import load_dotenv
 import time
 import socket
 import ssl
 #import paho.mqtt.client as paho
 
 import os
+import json
 import datetime
 import time
 import urllib
@@ -21,6 +22,17 @@ import traceback
 ###########################
 # NOTE: use python -m pip install mysql-connector
 # to install mysql connector
+
+load_dotenv('.env')
+
+########################
+# get creds from .env file
+dbhost = os.getenv('host')
+dbuser = os.getenv('user')
+dbpass = os.getenv('passwd')
+dbdb = os.getenv('database')
+
+
 
 #########################
 #NOC Light Color Options
@@ -45,10 +57,10 @@ Off = True
 #####################
 # Database Connection
 sqldb = mysql.connector.connect(
-  host="localhost",
-  user="plopez",
-  passwd="Gibson95!",
-  database="noclightaz"
+  host = dbhost,
+  user = dbuser,
+  password = dbpass,
+  database = dbdb
 )
 
 #####################
@@ -81,6 +93,9 @@ check = True
 # postMsg = "NOC Light restarted, URLs built, polling started"
 # console(postMsg)
 # rpiStartupPost(postMsg)
+
+print("Restarting the NOC Light, don't freak out...")
+# os.system('/usr/bin/supervisorctl restart noc_monitor')
 
 
 while check:
