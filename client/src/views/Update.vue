@@ -68,10 +68,18 @@
         >
           Submit
         </button>
+        <button 
+          class="btn btn-secondary submit-btn"
+          v-on:click="cancelUpdate"
+        >
+        Cancel
+        </button>
+
       Endpoint: {{ urlEndpointCheck }} <br>
       URL Type:{{ urlType }} <br>
       Enabled: {{ isEnabled }} 
       PostID: {{idForUpdate}}
+
       </div>
       
 
@@ -143,8 +151,15 @@ export default {
             })
             .then((response) => {
               console.log(response)
-              alert("Successfully Updated Endpoint")
-              this.$router.push('/dashboard')
+
+              if(response.status == 204) {
+                alert('No changes detected');
+                this.$router.push('/dashboard');
+              }
+              else if(response.status == 200) {
+                alert("Endpoint successfully updated.");
+                this.$router.push('/dashboard');
+              }
             })
             .catch((error) => {
               console.log(error)
@@ -163,6 +178,10 @@ export default {
           console.log(error)
         }
       })
+    },
+
+    cancelUpdate() {
+      this.$router.push('/dashboard')
     }
 
   },
