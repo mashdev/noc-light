@@ -71,6 +71,7 @@ def update(id):
       'uid' : request.json['data']['params']['uid']
       }
     }
+    print(json.dumps(row))
     result = db.updateUrlEndpoint(json.dumps(row))
     return result
     
