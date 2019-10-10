@@ -38,7 +38,6 @@ class DBConnection(object):
     self.reset()
     return result, self.getCategoryList()
 
-
   def getByEndpointName(self, names):
     name = names.rstrip('/')
     c = self.conn.cursor()
@@ -91,7 +90,6 @@ class DBConnection(object):
 
     except mysql.connector.Error as e:
       print ("Error:%d:%s" % (e.args[0], e.args[1]))
-    
 
   def updateUrlEndpoint(self, obj):
     row = json.loads(obj)
@@ -107,7 +105,11 @@ class DBConnection(object):
 
       if rc >= 1:
         self.conn.commit()
-        return json.dumps({'success':'201'}), 200, {'ContentType':'application/json'}
+        return json.dumps({'success':'200'}), 200, {'ContentType':'application/json'}
+      
+      elif rc == 0:
+        return json.dumps({'success':'204'}), 204, {'ContentType':'application/json'}
+
     
-    except NameError:
+    except:
       return json.dumps({'failed': 404}), 404, {'ContentType':'application/json'}
