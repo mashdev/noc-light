@@ -8,16 +8,16 @@
         <option value="3">Option 3</option>
       </select>
     </div>
-    
+
   </div>
 </template>
 
 <script>
 export default {
-  
-}
+
+};
 </script>
 
 <style scoped>
-  
+
 </style>
