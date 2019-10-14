@@ -33,11 +33,26 @@ def index():
   return 'Flask app running'
 
 # return list of current api's
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
-  if(request.method == 'GET'):
-    ## put in additional parameters for filtering/sorting
-    return jsonify(db.getUrlList("SELECT id, urlEndpoint, urlEnabled, u.categoryName FROM endpoints e INNER JOIN urlcategories u ON e.urlType = u.catid "))
+  if request.method == 'GET':
+    col = request.args['column']
+    order = request.args['sortBy']
+    
+    if col == "null":
+      return jsonify(db.getUrlList("SELECT id, urlEndpoint, urlEnabled, u.categoryName FROM endpoints e INNER JOIN urlcategories u ON e.urlType = u.catid ORDER BY urlEndpoint"))
+
+    if col == 'urlEndpoint':
+      return jsonify(db.getUrlList("SELECT id, urlEndpoint, urlEnabled, u.categoryName FROM endpoints e INNER JOIN urlcategories u ON e.urlType = u.catid ORDER BY "+col+" "+order))
+
+    if col == 'urlType':
+      return jsonify(db.getUrlList("SELECT id, urlEndpoint, urlEnabled, u.categoryName FROM endpoints e INNER JOIN urlcategories u ON e.urlType = u.catid ORDER BY "+col+" "+order))
+
+    if col == 'urlEnabled':
+      return jsonify(db.getUrlList("SELECT id, urlEndpoint, urlEnabled, u.categoryName FROM endpoints e INNER JOIN urlcategories u ON e.urlType = u.catid ORDER BY "+col+" "+order))
+    
+    else:
+      return jsonify(db.getUrlList("SELECT id, urlEndpoint, urlEnabled, u.categoryName FROM endpoints e INNER JOIN urlcategories u ON e.urlType = u.catid"))
 
 # create new monitored endpoint
 @app.route('/create', methods=['GET','POST'])
@@ -74,7 +89,6 @@ def update(id):
     print(json.dumps(row))
     result = db.updateUrlEndpoint(json.dumps(row))
     return result
-    
 
 # check if endpoint exists in db
 @app.route('/check/', methods=['GET', 'POST']) 
@@ -172,4 +186,3 @@ def categories():
 
 if __name__ == '__main__':
   app.run()
-
