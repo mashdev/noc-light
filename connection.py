@@ -19,10 +19,9 @@ class DBConnection(object):
       passwd=pw,
       database=db
     )
-  
+
   def reset(self):
     self.conn.reset_session()
-
 
   def getUrlList(self, query):
     c = self.conn.cursor()
